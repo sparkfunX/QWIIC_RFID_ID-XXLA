@@ -8959,9 +8959,10 @@ Allows current flow when high potential at base.</description>
 Open Jumper (Default): 0x7D
 Closed Jumper: 0x7C
 Software configurable as well</text>
-<text x="129.54" y="35.56" size="1.778" layer="97">Clear Buzzer Jumper 
-to remove Buzzer
-Sound</text>
+<text x="129.54" y="35.56" size="1.778" layer="97">Cut Buzzer Jumper 
+to remove buzzer
+sound when detecting 
+tag.</text>
 <text x="116.84" y="111.76" size="1.778" layer="97" font="vector">Cut INT jumper
 to remove 
 interrupt</text>
