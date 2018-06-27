@@ -9282,6 +9282,11 @@ resistors.</text>
 <wire x1="45.72" y1="175.26" x2="43.18" y2="175.26" width="0.1524" layer="91"/>
 <label x="43.18" y="175.26" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
 </segment>
+<segment>
+<pinref part="U1" gate="U1" pin="(ADC7)PA7"/>
+<wire x1="60.96" y1="119.38" x2="63.5" y2="119.38" width="0.1524" layer="91"/>
+<label x="63.5" y="119.38" size="1.27" layer="95" xref="yes"/>
+</segment>
 </net>
 <net name="SCL/SCK" class="0">
 <segment>
