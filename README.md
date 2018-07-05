@@ -1,1 +1,3 @@
-# QWIIC_RFID_ID-12LA
+QWIIC_RFID_ID-XXLA
+A Qwiic Alternative to Sparkfun's RFID board. 
+

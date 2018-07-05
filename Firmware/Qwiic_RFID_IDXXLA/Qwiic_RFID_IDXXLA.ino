@@ -25,34 +25,43 @@
 #include <avr/power.h> //Needed for powering down perihperals such as the ADC/TWI and Timers
 
 #define LOCATION_I2C_ADDRESS 0x01 //Location in EEPROM where the I2C address is stored
-#define I2C_ADDRESS_DEFAULT 135
-#define I2C_ADDRESS_NO_JUMPER 134
+#define I2C_ADDRESS_DEFAULT 125 //0x7D
+#define I2C_ADDRESS_NO_JUMPER 124 //0x7C
 
 #define COMMAND_CHANGE_ADDRESS 0xC7
 
 //Variables used in the I2C interrupt so we use volatile
 volatile byte setting_i2c_address = I2C_ADDRESS_DEFAULT; //The 7-bit I2C address of this the RFID Reader
 
-byte responseBuffer[3]; //Used to pass data back to master
 volatile byte responseSize = 1; //Defines how many bytes of relevant data is contained in the responseBuffer
+byte responseBuffer[7]; //5 byte ID, followed by 2 bytes of time used to pass data back to master
 
 //This struct keeps a record of any tag 'events' i.e. reads. 
-#define MAX_TAG_SPACE 10
+#define TAG_ID_SIZE 16 //Actual tag ID is 10 bytes
+#define MAX_TAG_STORAGE 10 
 struct {
-  byte tagID[5]; //Uniqe identifier of the RFID tag, 10 Ascii Characters long
+  byte tagID[7]; //Uniqe identifier of the RFID tag, 10 Ascii Characters long
   unsigned long tagTime; //When was the RFID tag sensed?
-} tagEvent[MAX_TAG_SPACE];
+} tagEvent[MAX_TAG_STORAGE];
+
 volatile byte newestTag = 0;
 volatile byte oldestTag = 0;
 
-const byte addr = 12; //--TEMPORARY-- addr jumper
+const byte addr = 8; //--TEMPORARY-- addr jumper
 const byte interruptPin = 9; //Pin goes low when a button event is available
+const byte startByte = 0x2; //Beginning Transmission Hex value
+const byte endByte = 0x3; //Ending Transmission Hex value
+const byte cRHex = 0xD; //Carriage Return Hex
+const byte lFHex = 0xA; //Line Follower Hex 
+
+byte tempInc[TAG_ID_SIZE]; 
+byte tempTagID[7];
 
 void setup(void)
 {
-  pinMode(addr, INPUT_PULLUP); //Default HIGH = 0x7D or 135
+  pinMode(addr, INPUT_PULLUP); //Default HIGH = 0x7D or 125
   pinMode(interruptPin, OUTPUT); //Tied high, goes low when a button event is on the stack
-
+	Serial.begin(9600); //Baud requirement for the ID Module
   //Disable ADC
   ADCSRA = 0;
   
@@ -72,11 +81,16 @@ void setup(void)
 
 void loop(void)
 {
-  //Check for new key presses
+  //Check for new RFID cards/capsules.
   if( Serial.available() )
 	{
-		tagEvent.tagID = Serial.read();
-		tagEvent.tagTime = millis(); 
+		while( Serial.available() ) 
+		{	
+			if( Serial.read() != startByte ) break; 
+			delay(11);
+			if( getTagID() ) tagEvent[newestTag].tagTime = millis(); 
+		}
+		if( newestTag++ == MAX_TAG_STORAGE ) newestTag = 0; 
 	}
 
   //Set interrupt pin as needed
@@ -87,6 +101,62 @@ void loop(void)
 
   sleep_mode(); //Stop everything and go to sleep. Wake up if I2C event occurs.
 }
+
+// We want to convert the tag from it's Ascii representation of a HEX value to the actual 
+// HEX value. The Ascii value is saved into a temporary array and the individual 
+// elements of the temporary array are passed to another function where they are converted 
+// to the decimal equivalent values and saved into another temporaray array. The value
+// is validated and then passed into the final array ready to be sent on the I2C bus.
+bool getTagID() 
+{
+	int j = 0; 
+	for( int i = 0; i < TAG_ID_SIZE - 1 ; i ++ )
+	{
+		tempInc[i] = Serial.read(); 	
+		delay(11); //The delay keeps the read commands from outpacing the baud rate of 9600.
+	}
+	for( int i = 0; i < TAG_ID_SIZE - 1; i ++ )
+	{
+		if( i % 2 == 0 && i !=0 ) j++; 
+		if( tempInc[i] == endByte ) break;
+		else if( i > 10 && (tempInc[i] == cRHex || tempInc[i] == lFHex)) continue; 
+		else if( i % 2 == 0 ) tempTagID[j] = convertAscii(tempInc[i]) << 4; //MSB
+		else ( tempTagID[j] |= convertAscii(tempInc[i]) );//LSB
+	}
+	
+	j=0;
+	
+	if( checkSum(tempTagID) )
+	{
+		for( int i = 0; i < 6; i++ )// All but the checksum loaded here.
+		{
+			tagEvent[newestTag].tagID[i] = tempTagID[i];
+		}
+		return true; 
+	} 
+	else return false; 
+}
+
+// Changes Ascii Values to their decimal representation by subtracting a fixed
+// number, best understood by taking a look at an Ascii table.
+byte convertAscii(byte asciiVal)
+{
+	if( asciiVal >= '0' && asciiVal <= '9' ) return asciiVal -= 48; 
+	else if( asciiVal >= 'A' && asciiVal <= 'F' ) return asciiVal -= 55; 
+}
+
+//Double checking checksum value given by the tag. 
+bool checkSum(byte* uncheckedTag)
+{
+	byte exOr = uncheckedTag[0]; 
+	for( int i = 1; i < 5 ; i ++)
+	{
+		exOr ^= uncheckedTag[i];
+	}
+	if( exOr == uncheckedTag[5] ) return true; 
+	else return false;
+}
+
 
 void receiveEvent(int numberOfBytesReceived)
 {
@@ -120,35 +190,38 @@ void receiveEvent(int numberOfBytesReceived)
 //The user sets the response type based on bytes sent to KeyPad
 void requestEvent()
 {
-  loadNextPressToArray();
-
-  //Send response buffer
+  loadNextTagToArray(); //Send response buffer
   for (byte x = 0 ; x < responseSize ; x++)
     Wire.write(responseBuffer[x]);
 }
 
 //Take the FIFO button press off the stack and load it into the transmit array
-void loadNextPressToArray()
+void loadNextTagToArray()
 {
   if (oldestTag != newestTag)
   {
-    responseBuffer[0] = tagEvent.tagID;
-
-    unsigned long timeSincePressed = millis() - tagEvent.tagTime;
-
-    responseBuffer[1] = timeSincePressed >> 8; //MSB
-    responseBuffer[2] = timeSincePressed; //LSB
-    if (oldestTag++ == BUTTON_STACK_SIZE) oldestTag = 0;
+		for( int i = 0; i <= 5; i ++ )
+		{
+			responseBuffer[i] = tagEvent[oldestTag].tagID[i];
+			Serial.println(tagEvent[oldestTag].tagID[i], HEX); 
+		}
+    unsigned long timeSincePressed = millis() - tagEvent[oldestTag].tagTime;
+    responseBuffer[6] = timeSincePressed >> 8; //MSB
+    responseBuffer[7] = timeSincePressed; //LSB
+		Serial.println();
+		Serial.print(responseBuffer[6]);
+		Serial.print(responseBuffer[7]);
+    if (oldestTag++ == MAX_TAG_STORAGE) oldestTag = 0;
   }
   else
   {
-    //No new button presses. Respond with a blank record
-    responseBuffer[0] = 0; //No button pressed
-    responseBuffer[1] = 0;
-    responseBuffer[2] = 0;
+    //No new ID's. 
+		for( int i = 0; i < 7; i++ )
+		{
+			responseBuffer[i] = 0; 
+		}
   }
-
-  responseSize = 3;
+	responseSize = sizeof(responseBuffer); 
 }
 
 //Reads the current system settings from EEPROM
