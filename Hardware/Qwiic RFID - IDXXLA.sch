@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="9.0.1">
+<eagle version="9.1.0">
 <drawing>
 <settings>
 <setting alwaysvectorfont="yes"/>
@@ -9052,7 +9052,10 @@ using ID-2LA</text>
 <instance part="R3" gate="G$1" x="175.26" y="60.96" rot="R180"/>
 <instance part="SUPPLY10" gate="G$1" x="167.64" y="63.5"/>
 <instance part="D1" gate="G$1" x="185.42" y="60.96" rot="R90"/>
-<instance part="JP7" gate="G$1" x="68.58" y="101.6" rot="R180"/>
+<instance part="JP7" gate="G$1" x="68.58" y="101.6" smashed="yes" rot="R180">
+<attribute name="NAME" x="71.12" y="99.06" size="1.778" layer="95" font="vector" rot="R180"/>
+<attribute name="VALUE" x="71.374" y="103.124" size="1.778" layer="96" font="vector" rot="R180" align="top-left"/>
+</instance>
 <instance part="GND5" gate="1" x="76.2" y="93.98"/>
 <instance part="JP8" gate="G$1" x="127" y="124.46"/>
 <instance part="U1" gate="U1" x="43.18" y="116.84"/>
@@ -9242,40 +9245,6 @@ using ID-2LA</text>
 <wire x1="15.24" y1="111.76" x2="15.24" y2="114.3" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="SCL" class="0">
-<segment>
-<pinref part="J2" gate="G$1" pin="SCL"/>
-<wire x1="27.94" y1="53.34" x2="22.86" y2="53.34" width="0.1524" layer="91"/>
-<label x="22.86" y="53.34" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
-</segment>
-<segment>
-<pinref part="J3" gate="G$1" pin="SCL"/>
-<wire x1="60.96" y1="53.34" x2="55.88" y2="53.34" width="0.1524" layer="91"/>
-<label x="55.88" y="53.34" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
-</segment>
-<segment>
-<pinref part="J4" gate="G$1" pin="SCL"/>
-<wire x1="27.94" y1="25.4" x2="22.86" y2="25.4" width="0.1524" layer="91"/>
-<label x="22.86" y="25.4" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
-</segment>
-</net>
-<net name="SDA" class="0">
-<segment>
-<pinref part="J2" gate="G$1" pin="SDA"/>
-<wire x1="27.94" y1="50.8" x2="22.86" y2="50.8" width="0.1524" layer="91"/>
-<label x="22.86" y="50.8" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
-</segment>
-<segment>
-<pinref part="J3" gate="G$1" pin="SDA"/>
-<wire x1="60.96" y1="50.8" x2="55.88" y2="50.8" width="0.1524" layer="91"/>
-<label x="55.88" y="50.8" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
-</segment>
-<segment>
-<pinref part="J4" gate="G$1" pin="SDA"/>
-<wire x1="27.94" y1="22.86" x2="22.86" y2="22.86" width="0.1524" layer="91"/>
-<label x="22.86" y="22.86" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
-</segment>
-</net>
 <net name="!INT" class="0">
 <segment>
 <wire x1="60.96" y1="27.94" x2="58.42" y2="27.94" width="0.1524" layer="91"/>
@@ -9368,6 +9337,21 @@ using ID-2LA</text>
 <wire x1="60.96" y1="111.76" x2="63.5" y2="111.76" width="0.1524" layer="91"/>
 <label x="63.5" y="111.76" size="1.27" layer="95" font="vector" xref="yes"/>
 </segment>
+<segment>
+<pinref part="J2" gate="G$1" pin="SCL"/>
+<wire x1="27.94" y1="53.34" x2="22.86" y2="53.34" width="0.1524" layer="91"/>
+<label x="22.86" y="53.34" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
+</segment>
+<segment>
+<pinref part="J3" gate="G$1" pin="SCL"/>
+<wire x1="60.96" y1="53.34" x2="55.88" y2="53.34" width="0.1524" layer="91"/>
+<label x="55.88" y="53.34" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
+</segment>
+<segment>
+<pinref part="J4" gate="G$1" pin="SCL"/>
+<wire x1="27.94" y1="25.4" x2="22.86" y2="25.4" width="0.1524" layer="91"/>
+<label x="22.86" y="25.4" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
+</segment>
 </net>
 <net name="SDA/MOSI" class="0">
 <segment>
@@ -9385,6 +9369,21 @@ using ID-2LA</text>
 <pinref part="U1" gate="U1" pin="(RX/SDA/MOSI/A6)~6"/>
 <wire x1="60.96" y1="116.84" x2="63.5" y2="116.84" width="0.1524" layer="91"/>
 <label x="63.5" y="116.84" size="1.27" layer="95" font="vector" xref="yes"/>
+</segment>
+<segment>
+<pinref part="J2" gate="G$1" pin="SDA"/>
+<wire x1="27.94" y1="50.8" x2="22.86" y2="50.8" width="0.1524" layer="91"/>
+<label x="22.86" y="50.8" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
+</segment>
+<segment>
+<pinref part="J3" gate="G$1" pin="SDA"/>
+<wire x1="60.96" y1="50.8" x2="55.88" y2="50.8" width="0.1524" layer="91"/>
+<label x="55.88" y="50.8" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
+</segment>
+<segment>
+<pinref part="J4" gate="G$1" pin="SDA"/>
+<wire x1="27.94" y1="22.86" x2="22.86" y2="22.86" width="0.1524" layer="91"/>
+<label x="22.86" y="22.86" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
 </segment>
 </net>
 <net name="!RST" class="0">
@@ -9426,14 +9425,14 @@ using ID-2LA</text>
 </net>
 <net name="DATA_UART" class="0">
 <segment>
-<pinref part="U1" gate="U1" pin="(XTAL2)9"/>
-<wire x1="60.96" y1="127" x2="63.5" y2="127" width="0.1524" layer="91"/>
-<label x="63.5" y="127" size="1.27" layer="95" font="vector" xref="yes"/>
-</segment>
-<segment>
 <pinref part="U2" gate="G$1" pin="D0"/>
 <wire x1="215.9" y1="134.62" x2="218.44" y2="134.62" width="0.1524" layer="91"/>
 <label x="218.44" y="134.62" size="1.27" layer="95" font="vector" xref="yes"/>
+</segment>
+<segment>
+<pinref part="U1" gate="U1" pin="(A2)2"/>
+<wire x1="60.96" y1="106.68" x2="63.5" y2="106.68" width="0.1524" layer="91"/>
+<label x="63.5" y="106.68" size="1.27" layer="95" font="vector" xref="yes"/>
 </segment>
 </net>
 <net name="TAG_IN_RANGE" class="0">

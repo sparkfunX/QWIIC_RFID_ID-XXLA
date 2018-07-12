@@ -21,8 +21,10 @@
 
 #include <EEPROM.h>
 
-#include <avr/sleep.h> //Needed for sleep_mode
-#include <avr/power.h> //Needed for powering down perihperals such as the ADC/TWI and Timers
+#include <SoftwareSerial.h>
+
+#include <avr/sleep.h>
+#include <avr/power.h> 
 
 #define LOCATION_I2C_ADDRESS 0x01 //Location in EEPROM where the I2C address is stored
 #define I2C_ADDRESS_DEFAULT 125 //0x7D
@@ -30,26 +32,32 @@
 
 #define COMMAND_CHANGE_ADDRESS 0xC7
 
-//Variables used in the I2C interrupt so we use volatile
-volatile byte setting_i2c_address = I2C_ADDRESS_DEFAULT; //The 7-bit I2C address of this the RFID Reader
+volatile byte setting_i2c_address = I2C_ADDRESS_DEFAULT; 
 
-volatile byte responseSize = 1; //Defines how many bytes of relevant data is contained in the responseBuffer
-byte responseBuffer[7]; //5 byte ID, followed by 2 bytes of time used to pass data back to master
+volatile byte responseSize = 1; 
+byte responseBuffer[9]; //6 byte ID, followed by 2 bytes of time used to pass data back to master
 
 //This struct keeps a record of any tag 'events' i.e. reads. 
-#define TAG_ID_SIZE 16 //Actual tag ID is 10 bytes
+#define TAG_ID_SIZE 16 // This includes the 10 byte tag ID, 2 byte Checksum, and the 4 other bytes listed below.
 #define MAX_TAG_STORAGE 10 
 struct {
-  byte tagID[7]; //Uniqe identifier of the RFID tag, 10 Ascii Characters long
+  byte tagID[7]; //Uniqe identifier of the RFID tag.
   unsigned long tagTime; //When was the RFID tag sensed?
 } tagEvent[MAX_TAG_STORAGE];
 
 volatile byte newestTag = 0;
 volatile byte oldestTag = 0;
 
-const byte addr = 8; //--TEMPORARY-- addr jumper
-const byte interruptPin = 9; //Pin goes low when a button event is available
-const byte startByte = 0x2; //Beginning Transmission Hex value
+const byte addrPin = 0; 
+const byte interruptPin = 3; //Pin goes low when a button event is available
+const byte tagInRange = 8; //Pin goes high when a tag is sensed (unused). 
+const byte resetPin = 11; 
+
+const byte rxPin = 2; 
+const byte txPin = 1; //Pin is unconnected and unused.
+SoftwareSerial atSerial = SoftwareSerial(rxPin, txPin); 
+
+const byte startByte = 0x2; //Beginning Transmission Hex value 
 const byte endByte = 0x3; //Ending Transmission Hex value
 const byte cRHex = 0xD; //Carriage Return Hex
 const byte lFHex = 0xA; //Line Follower Hex 
@@ -59,12 +67,15 @@ byte tempTagID[7];
 
 void setup(void)
 {
-  pinMode(addr, INPUT_PULLUP); //Default HIGH = 0x7D or 125
+  pinMode(addrPin, INPUT_PULLUP); //Default HIGH = 0x7D or 125
   pinMode(interruptPin, OUTPUT); //Tied high, goes low when a button event is on the stack
-	Serial.begin(9600); //Baud requirement for the ID Module
+
+  pinMode(rxPin, INPUT); 
+  pinMode(txPin, OUTPUT); 
+	atSerial.begin(9600); //Baud requirement for the ID Module
+
   //Disable ADC
   ADCSRA = 0;
-  
   //Disble Brown-Out Detect
   MCUCR = bit (BODS) | bit (BODSE);
   MCUCR = bit (BODS);
@@ -81,12 +92,12 @@ void setup(void)
 
 void loop(void)
 {
-  //Check for new RFID cards/capsules.
-  if( Serial.available() )
+  //Waiting for new RFID cards/capsules.
+  if( atSerial.available() )
 	{
-		while( Serial.available() ) 
+		while( atSerial.available() ) 
 		{	
-			if( Serial.read() != startByte ) break; 
+			if( atSerial.read() != startByte ) break; 
 			delay(11);
 			if( getTagID() ) tagEvent[newestTag].tagTime = millis(); 
 		}
@@ -102,17 +113,17 @@ void loop(void)
   sleep_mode(); //Stop everything and go to sleep. Wake up if I2C event occurs.
 }
 
-// We want to convert the tag from it's Ascii representation of a HEX value to the actual 
-// HEX value. The Ascii value is saved into a temporary array and the individual 
-// elements of the temporary array are passed to another function where they are converted 
-// to the decimal equivalent values and saved into another temporaray array. The value
+// We want to convert the tag from it's Ascii representation of a HEX value from the module 
+// (12 bytes) to the actual HEX value (6 bytes). The Ascii value is saved into a temporary array 
+// and the individual elements of the temporary array are passed to another function where they 
+// are converted to the decimal equivalent values and saved into another temporaray array. The value
 // is validated and then passed into the final array ready to be sent on the I2C bus.
 bool getTagID() 
 {
 	int j = 0; 
 	for( int i = 0; i < TAG_ID_SIZE - 1 ; i ++ )
 	{
-		tempInc[i] = Serial.read(); 	
+		tempInc[i] = atSerial.read(); 	
 		delay(11); //The delay keeps the read commands from outpacing the baud rate of 9600.
 	}
 	for( int i = 0; i < TAG_ID_SIZE - 1; i ++ )
@@ -128,7 +139,7 @@ bool getTagID()
 	
 	if( checkSum(tempTagID) )
 	{
-		for( int i = 0; i < 6; i++ )// All but the checksum loaded here.
+		for( int i = 0; i < 6; i++ )
 		{
 			tagEvent[newestTag].tagID[i] = tempTagID[i];
 		}
@@ -138,14 +149,15 @@ bool getTagID()
 }
 
 // Changes Ascii Values to their decimal representation by subtracting a fixed
-// number, best understood by taking a look at an Ascii table.
+// number, best understood by taking a look at an Ascii table. For example: we're 
+// changing an Ascii zero, to an actual zero.
 byte convertAscii(byte asciiVal)
 {
 	if( asciiVal >= '0' && asciiVal <= '9' ) return asciiVal -= 48; 
 	else if( asciiVal >= 'A' && asciiVal <= 'F' ) return asciiVal -= 55; 
 }
 
-//Double checking checksum value given by the tag. 
+//Double checking checksum value given by the tag module just in case of a bad read. 
 bool checkSum(byte* uncheckedTag)
 {
 	byte exOr = uncheckedTag[0]; 
@@ -203,14 +215,10 @@ void loadNextTagToArray()
 		for( int i = 0; i <= 5; i ++ )
 		{
 			responseBuffer[i] = tagEvent[oldestTag].tagID[i];
-			Serial.println(tagEvent[oldestTag].tagID[i], HEX); 
 		}
     unsigned long timeSincePressed = millis() - tagEvent[oldestTag].tagTime;
     responseBuffer[6] = timeSincePressed >> 8; //MSB
     responseBuffer[7] = timeSincePressed; //LSB
-		Serial.println();
-		Serial.print(responseBuffer[6]);
-		Serial.print(responseBuffer[7]);
     if (oldestTag++ == MAX_TAG_STORAGE) oldestTag = 0;
   }
   else
@@ -242,7 +250,7 @@ void startI2C()
 {
   Wire.end(); //Before we can change addresses we need to stop
   
-  if (digitalRead(addr) == HIGH) //Default is HIGH, the jumper is closed with paste in production
+  if (digitalRead(addrPin) == HIGH) //Default is HIGH, the jumper is closed with paste in production
     Wire.begin(setting_i2c_address); //Start I2C and answer calls using address from EEPROM
   else
     Wire.begin(I2C_ADDRESS_NO_JUMPER); //Force address to I2C_ADDRESS_NO_JUMPER if user has opened the solder jumper
