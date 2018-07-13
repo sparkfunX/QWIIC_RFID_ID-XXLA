@@ -8991,7 +8991,7 @@ Commonly used for small ceramic capacitors. Like our 0.1uF (http://www.sparkfun.
 <sheets>
 <sheet>
 <plain>
-<text x="237.744" y="7.366" size="2.54" layer="94" font="vector">X01</text>
+<text x="237.744" y="7.366" size="2.54" layer="94" font="vector">X02</text>
 <wire x1="0" y1="83.82" x2="81.28" y2="83.82" width="0.2032" layer="97" style="shortdash"/>
 <text x="86.36" y="76.2" size="2.54" layer="94" font="vector">Buzzer and Power LED</text>
 <text x="149.86" y="180.34" size="2.54" layer="94" font="vector">RFID READER</text>

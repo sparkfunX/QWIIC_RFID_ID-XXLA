@@ -166,7 +166,7 @@
 <wire x1="0" y1="30.48" x2="25.4" y2="30.48" width="0.2032" layer="20"/>
 <wire x1="25.4" y1="30.48" x2="25.4" y2="0" width="0.2032" layer="20"/>
 <wire x1="25.4" y1="0" x2="0" y2="0" width="0.2032" layer="20"/>
-<text x="17.653" y="29.21" size="1.27" layer="16" font="vector" ratio="15" rot="MR0" align="center">X01</text>
+<text x="17.653" y="29.21" size="1.27" layer="16" font="vector" ratio="15" rot="MR0" align="center">X02</text>
 <text x="1.27" y="38.1" size="1.778" layer="47" font="vector" ratio="15">Units in Inches</text>
 <text x="21.59" y="-10.16" size="1.778" layer="51" font="vector" ratio="15">Elias Santistevan</text>
 <dimension x1="0" y1="0" x2="0" y2="30.48" x3="-3.81" y3="15.24" textsize="1.778" textratio="15" layer="47" unit="inch"/>
