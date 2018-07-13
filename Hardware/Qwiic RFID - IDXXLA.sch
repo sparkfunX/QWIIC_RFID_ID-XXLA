@@ -8993,10 +8993,10 @@ Commonly used for small ceramic capacitors. Like our 0.1uF (http://www.sparkfun.
 <plain>
 <text x="237.744" y="7.366" size="2.54" layer="94" font="vector">X01</text>
 <wire x1="0" y1="83.82" x2="81.28" y2="83.82" width="0.2032" layer="97" style="shortdash"/>
-<text x="86.36" y="76.2" size="2.54" layer="97" font="vector">Buzzer and Power LED</text>
-<text x="149.86" y="180.34" size="2.54" layer="97" font="vector">RFID READER</text>
-<text x="5.08" y="180.34" size="2.54" layer="97" font="vector">ATTINY84</text>
-<text x="5.08" y="76.2" size="2.54" layer="97" font="vector">QWIIC CONNECTORS</text>
+<text x="86.36" y="76.2" size="2.54" layer="94" font="vector">Buzzer and Power LED</text>
+<text x="149.86" y="180.34" size="2.54" layer="94" font="vector">RFID READER</text>
+<text x="5.08" y="180.34" size="2.54" layer="94" font="vector">ATTINY84</text>
+<text x="5.08" y="76.2" size="2.54" layer="94" font="vector">QWIIC CONNECTORS</text>
 <wire x1="81.28" y1="83.82" x2="147.32" y2="83.82" width="0.2032" layer="97" style="shortdash"/>
 <wire x1="147.32" y1="83.82" x2="248.92" y2="83.82" width="0.2032" layer="97" style="shortdash"/>
 <wire x1="147.32" y1="185.42" x2="147.32" y2="83.82" width="0.2032" layer="97" style="shortdash"/>
@@ -9043,7 +9043,7 @@ using ID-2LA</text>
 <instance part="SUPPLY8" gate="G$1" x="25.4" y="27.94"/>
 <instance part="J4" gate="G$1" x="35.56" y="20.32" rot="MR0"/>
 <instance part="GND8" gate="1" x="25.4" y="12.7"/>
-<instance part="LOGO1" gate="G$1" x="228.6" y="48.26"/>
+<instance part="LOGO1" gate="G$1" x="236.22" y="45.72"/>
 <instance part="J5" gate="G$1" x="68.58" y="27.94" rot="R180"/>
 <instance part="R1" gate="G$1" x="134.62" y="132.08" rot="R90"/>
 <instance part="SUPPLY2" gate="G$1" x="134.62" y="139.7"/>
@@ -9088,7 +9088,7 @@ using ID-2LA</text>
 <instance part="R7" gate="G$1" x="104.14" y="22.86" rot="R180"/>
 <instance part="R8" gate="G$1" x="111.76" y="38.1" rot="R90"/>
 <instance part="SUPPLY12" gate="G$1" x="116.84" y="60.96"/>
-<instance part="U$4" gate="G$1" x="200.66" y="40.64"/>
+<instance part="U$4" gate="G$1" x="210.82" y="40.64"/>
 <instance part="J7" gate="G$1" x="68.58" y="22.86" rot="R180"/>
 <instance part="C1" gate="G$1" x="15.24" y="116.84"/>
 <instance part="SUPPLY13" gate="G$1" x="15.24" y="124.46"/>
