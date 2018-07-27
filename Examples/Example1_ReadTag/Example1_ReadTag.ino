@@ -41,9 +41,9 @@ void checkTagID()
 {	
 	Serial.print("RFID Tag ID: "); 
 	Wire.requestFrom((uint8_t)RFID_ADDR, (uint8_t)6); 
-	for( int x = 0; x < 7; x++ ) 
+	for( int x = 0; x < 6; x++ ) 
 		tagID[x] = Wire.read(); 
-	for( int x = 0; x < 7; x++ ) 
-		Serial.print(tagID[x]); 
+	for( int x = 0; x < 6; x++ ) 
+		Serial.print(tagID[x], HEX); 
 	Serial.println(); 
 }

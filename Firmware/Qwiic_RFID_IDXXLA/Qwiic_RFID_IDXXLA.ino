@@ -34,15 +34,15 @@
 
 volatile byte setting_i2c_address = I2C_ADDRESS_DEFAULT; 
 
-volatile byte responseSize = 1; 
-byte responseBuffer[9]; //6 byte ID, followed by 2 bytes of time used to pass data back to master
+volatile byte responseSize = 8; 
+byte responseBuffer[8]; //6 byte ID, followed by 2 bytes of time used to pass data back to master
 
 //This struct keeps a record of any tag 'events' i.e. reads. 
 //This includes the 10 byte Ascii tag ID, 2 byte Checksum, and the 4 other bytes listed below.
 #define TAG_ID_SIZE 16 
 #define MAX_TAG_STORAGE 20 //How many tags will be held at a time before the first is overwritten.
 struct {
-  byte tagID[7]; //The Uniqe identifier of the RFID tag, converted from ASCII to HEX will be six bytes in size.
+  byte tagID[6]; //The Uniqe identifier of the RFID tag, converted from ASCII to HEX will be six bytes in size.
   unsigned long tagTime; //When was the RFID tag sensed?
 } tagEvent[MAX_TAG_STORAGE];
 
@@ -63,7 +63,7 @@ const byte cRHex = 0xD; //Carriage Return Hex
 const byte lFHex = 0xA; //Line Follower Hex 
 
 byte tempInc[TAG_ID_SIZE]; 
-byte tempTagID[7];
+byte tempTagID[6];
 
 void setup(void)
 {
@@ -227,7 +227,6 @@ void loadNextTagToArray()
 			responseBuffer[i] = 0; 
 		}
   }
-	responseSize = sizeof(responseBuffer); 
 }
 
 //Reads the current system settings from EEPROM
