@@ -34,8 +34,9 @@
 
 volatile byte setting_i2c_address = I2C_ADDRESS_DEFAULT; 
 
-volatile byte responseSize = 8; 
-byte responseBuffer[8]; //6 byte ID, followed by 2 bytes of time used to pass data back to master
+volatile byte responseSize = 10; 
+//6 byte ID, followed by 4 bytes of time used to pass data back to master
+byte responseBuffer[10]; 
 
 //This struct keeps a record of any tag 'events' i.e. reads. 
 //This includes the 10 byte Ascii tag ID, 2 byte Checksum, and the 4 other bytes listed below.
@@ -54,7 +55,8 @@ const byte interruptPin = 3; //Pin goes low when a tag event is available
 const byte resetPin = 11; 
 
 const byte rxPin = 2; 
-const byte txPin = 1; //Pin is unconnected and unused.
+const byte txPin = 1; //TX Pin is unconnected, unused, and unnecessary except for Software Serial declaration.
+
 SoftwareSerial atSerial = SoftwareSerial(rxPin, txPin); 
 
 const byte startByte = 0x2; //Beginning Transmission Hex value 
@@ -68,7 +70,7 @@ byte tempTagID[6];
 void setup(void)
 {
   pinMode(addrPin, INPUT_PULLUP); //Default HIGH = 0x7D or 125
-  pinMode(interruptPin, OUTPUT); //Tied high, goes low when a button event is on the stack
+  pinMode(interruptPin, OUTPUT); //Tied high and goes low when an RFID has been scanned.
 
   pinMode(rxPin, INPUT); 
   pinMode(txPin, OUTPUT); 
@@ -98,8 +100,8 @@ void loop(void)
 		while( atSerial.available() ) 
 		{	
 			if( atSerial.read() != startByte ) break; 
-			delay(11);
-			if( getTagID() ) tagEvent[newestTag].tagTime = millis(); //Get the Tag ID, and verify its' contents.
+			delay(11);//Necessary to not overwhelm the ID-XXLA module baud rate.
+			if( getTagID() ) tagEvent[newestTag].tagTime = millis(); //Get the Tag ID, and verify its' contents, then grab time. 
 		}
 		if( newestTag++ == MAX_TAG_STORAGE ) newestTag = 0; 
 	}
@@ -134,9 +136,8 @@ bool getTagID()
 		else if( i % 2 == 0 ) tempTagID[j] = convertAscii(tempInc[i]) << 4; //MSB
 		else ( tempTagID[j] |= convertAscii(tempInc[i]) );//LSB
 	}
-	
 	j=0;
-	
+
 	if( checkSum(tempTagID) )
 	{
 		for( int i = 0; i < 6; i++ )
@@ -150,7 +151,7 @@ bool getTagID()
 
 // Changes Ascii Values to their decimal representation by subtracting a fixed
 // number, best understood by taking a look at an Ascii table. For example: we're 
-// changing an Ascii zero, to an actual zero.
+// changing an Ascii zero, to an actual zero: ASCII "0" = 48 decimal.
 byte convertAscii(byte asciiVal)
 {
 	if( asciiVal >= '0' && asciiVal <= '9' ) return asciiVal -= 48; 
@@ -215,8 +216,10 @@ void loadNextTagToArray()
 			responseBuffer[i] = tagEvent[oldestTag].tagID[i];
 		}
     unsigned long timeSincePressed = millis() - tagEvent[oldestTag].tagTime;//This is the time since last scan.
-    responseBuffer[6] = timeSincePressed >> 8; //MSB
-    responseBuffer[7] = timeSincePressed; //LSB
+    responseBuffer[6] = timeSincePressed >> 24; //MSB
+    responseBuffer[7] = timeSincePressed >> 16; 
+    responseBuffer[8] = timeSincePressed >> 8;
+    responseBuffer[9] = timeSincePressed; //LSB
     if (oldestTag++ == MAX_TAG_STORAGE) oldestTag = 0;
   }
   else

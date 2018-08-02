@@ -2,11 +2,11 @@
 	Qwiic RFID board fot the ID-XXLA Modules
 	By: Elias Santistevan
 	Sparkfun Electronics
-	Date: July 18th, 2018
+	Date: August 2nd, 2018
 	License: This code is public domain but if you use this and we meet someday, get me a beer! 
 
 	Feel like supporting our work? Buy a board from Sparkfun!
-	<website here>
+	https://www.sparkfun.com/products/14867
 
 	This example will do one thing for you: It will give the RFID tag's ID of the first tag scanned. 
 */
@@ -15,7 +15,7 @@
 
 #define RFID_ADDR 0x7D //0x7D is the default address, 0x7C if you close the address jumper.
 
-byte tagID[7]; //Length of the tag is 5 bytes long followed by 1 byte of checksum.
+byte tagID[6]; //Length of the tag is 5 bytes long followed by 1 byte of checksum.
 
 //We'll use a pin attached to the interrupt line to initiate the check for the RFID tag ID. 
 //Feel free to remove it and do a manual check.
