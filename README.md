@@ -15,7 +15,7 @@ Repository Contents
 -------------------
 
 * **/Examples** - A number of examples to show how to read buttons with time, change the I2C address and scan for I2C devices
-* **/Firmware** - The core sketch that runs Qwiic Keypad
+* **/Firmware** - The core sketch that runs Qwiic RFID ID-XXLA
 * **/Hardware** - Eagle design files (.brd, .sch)
 
 License Information
